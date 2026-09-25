@@ -1,9 +1,15 @@
-// Green Belt Nursery - zero-dependency Node.js server (Node 16+).  Run: node server.js
+// Green Belt Nursery - Node.js server (Node 18+, for built-in fetch). Run: node server.js
 const http = require('http'), fs = require('fs'), path = require('path'), crypto = require('crypto');
 const PORT = process.env.PORT || 3000;
-const DB = path.join(__dirname, 'data.json'), UP = path.join(__dirname, 'uploads'), PUB = path.join(__dirname, 'public');
+const DATA = process.env.DATA_DIR || __dirname; // used only when Supabase is not configured
+const PUB = path.join(__dirname, 'public');
 const ADMIN = { email: process.env.ADMIN_EMAIL || 'admin@greenbelt.in', pass: process.env.ADMIN_PASS || 'admin123' };
-fs.mkdirSync(UP, { recursive: true });
+
+// --- Storage: Supabase (survives redeploys, needed on Render's free plan) if configured, else a local file (for local testing) ---
+const SB_URL = process.env.SUPABASE_URL, SB_KEY = process.env.SUPABASE_SERVICE_KEY, SB_BUCKET = process.env.SUPABASE_BUCKET || 'uploads';
+const USE_SUPABASE = !!(SB_URL && SB_KEY);
+const DB = path.join(DATA, 'data.json'), UP = path.join(DATA, 'uploads');
+if (!USE_SUPABASE) { fs.mkdirSync(DATA, { recursive: true }); fs.mkdirSync(UP, { recursive: true }); }
 
 const uid = () => crypto.randomBytes(5).toString('hex');
 const hash = p => crypto.createHash('sha256').update(String(p)).digest('hex');
@@ -43,9 +49,26 @@ const seed = {
   ],
   users: [], messages: []
 };
-let db = fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB, 'utf8')) : seed;
-const save = () => fs.writeFileSync(DB, JSON.stringify(db, null, 2));
-save();
+async function loadDB() {
+  if (!USE_SUPABASE) return fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB, 'utf8')) : seed;
+  const r = await fetch(`${SB_URL}/rest/v1/kv_store?key=eq.main&select=value`, { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } });
+  if (!r.ok) throw new Error('Supabase read failed: ' + await r.text());
+  const rows = await r.json();
+  if (rows.length) return rows[0].value;
+  await saveDB(seed); // first run: seed the table
+  return seed;
+}
+async function saveDB(d) {
+  if (!USE_SUPABASE) return fs.writeFileSync(DB, JSON.stringify(d, null, 2));
+  const r = await fetch(`${SB_URL}/rest/v1/kv_store?on_conflict=key`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify({ key: 'main', value: d })
+  });
+  if (!r.ok) throw new Error('Supabase write failed: ' + await r.text());
+}
+let db; // populated at startup, see bottom of file
+const save = () => saveDB(db);
 const sessions = {};
 const COLS = ['plants', 'posts', 'work', 'lab'];
 
@@ -71,55 +94,67 @@ async function api(req, res, p, m) {
     if (!b.name || !b.email || !b.pass || b.pass.length < 6) return S(400, { error: 'Enter a name, email and a password of 6+ characters.' });
     if (db.users.some(x => x.email === b.email)) return S(400, { error: 'That email already has an account.' });
     const u = { name: b.name, email: b.email, pass: hash(b.pass), favs: [] };
-    db.users.push(u); save(); return S(200, login(u, 'user'));
+    db.users.push(u); await save(); return S(200, login(u, 'user'));
   }
   if (p === '/api/contact' && m === 'POST') {
     if (!b.name || !b.msg) return S(400, { error: 'Add your name and a message.' });
     db.messages.unshift({ id: uid(), name: b.name, email: b.email || '', msg: b.msg, date: new Date().toISOString() });
-    save(); return S(200, { ok: 1 });
+    await save(); return S(200, { ok: 1 });
   }
   if (p === '/api/me') {
     const u = s && s.role === 'user' && db.users.find(x => x.email === s.email);
     if (!u) return S(401, { error: 'Log in first.' });
-    if (m === 'POST') { const i = u.favs.indexOf(b.id); i < 0 ? u.favs.push(b.id) : u.favs.splice(i, 1); save(); }
+    if (m === 'POST') { const i = u.favs.indexOf(b.id); i < 0 ? u.favs.push(b.id) : u.favs.splice(i, 1); await save(); }
     return S(200, { name: u.name, email: u.email, favs: u.favs });
   }
   if (p.startsWith('/api/admin/')) {
     if (!s || s.role !== 'admin') return S(401, { error: 'Admin only.' });
     const [, , , col, id] = p.split('/');
-    if (col === 'site' && m === 'PUT') { Object.assign(db.site, b); save(); return S(200, db.site); }
+    if (col === 'site' && m === 'PUT') { Object.assign(db.site, b); await save(); return S(200, db.site); }
     if (col === 'messages') {
-      if (m === 'DELETE') { db.messages = db.messages.filter(x => x.id !== id); save(); }
+      if (m === 'DELETE') { db.messages = db.messages.filter(x => x.id !== id); await save(); }
       return S(200, db.messages);
     }
     if (col === 'upload' && m === 'POST') {
-      const r = /^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,(.+)$/.exec(b.data || '');
-      if (!r) return S(400, { error: 'Unsupported image.' });
-      const f = uid() + '.' + r[1].replace('jpeg', 'jpg').replace('+xml', '');
-      fs.writeFileSync(path.join(UP, f), Buffer.from(r[2], 'base64'));
+      const r = /^data:image\/(png|jpe?g|webp|gif);base64,(.+)$/.exec(b.data || '');
+      if (!r) return S(400, { error: 'Unsupported image. Use PNG, JPG, WEBP or GIF.' });
+      const ext = r[1].replace('jpeg', 'jpg'), buf = Buffer.from(r[2], 'base64'), f = uid() + '.' + ext;
+      if (USE_SUPABASE) {
+        const up = await fetch(`${SB_URL}/storage/v1/object/${SB_BUCKET}/${f}`, {
+          method: 'POST',
+          headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': `image/${ext === 'jpg' ? 'jpeg' : ext}` },
+          body: buf
+        });
+        if (!up.ok) return S(500, { error: 'Image upload failed: ' + await up.text() });
+        return S(200, { url: `${SB_URL}/storage/v1/object/public/${SB_BUCKET}/${f}` });
+      }
+      fs.writeFileSync(path.join(UP, f), buf);
       return S(200, { url: '/uploads/' + f });
     }
     if (COLS.includes(col)) {
-      if (m === 'POST') { const o = { ...b, id: uid() }; db[col].unshift(o); save(); return S(200, o); }
+      if (m === 'POST') { const o = { ...b, id: uid() }; db[col].unshift(o); await save(); return S(200, o); }
       const i = db[col].findIndex(x => x.id === id);
       if (i < 0) return S(404, { error: 'Not found.' });
-      if (m === 'PUT') { db[col][i] = { ...db[col][i], ...b, id }; save(); return S(200, db[col][i]); }
-      if (m === 'DELETE') { db[col].splice(i, 1); save(); return S(200, { ok: 1 }); }
+      if (m === 'PUT') { db[col][i] = { ...db[col][i], ...b, id }; await save(); return S(200, db[col][i]); }
+      if (m === 'DELETE') { db[col].splice(i, 1); await save(); return S(200, { ok: 1 }); }
     }
   }
   S(404, { error: 'Not found.' });
 }
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.svg': 'image/svg+xml' };
-http.createServer(async (req, res) => {
-  try {
-    const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-    if (p.startsWith('/api/')) return await api(req, res, p, req.method);
-    const fp = p.startsWith('/uploads/') ? path.join(UP, path.basename(p)) : path.join(PUB, path.normalize(p === '/' ? '/index.html' : p));
-    if (!fp.startsWith(PUB) && !fp.startsWith(UP)) { res.writeHead(403); return res.end(); }
-    fs.readFile(fp, (e, d) => {
-      if (e) { res.writeHead(404); return res.end('Not found'); }
-      res.writeHead(200, { 'Content-Type': MIME[path.extname(fp)] || 'application/octet-stream' }); res.end(d);
-    });
-  } catch (e) { send(res, 500, { error: 'Server error' }); }
-}).listen(PORT, () => console.log(`\n  Green Belt Nursery running at http://localhost:${PORT}\n  Admin login: ${ADMIN.email} / ${ADMIN.pass}\n`));
+(async () => {
+  try { db = await loadDB(); } catch (e) { console.error('Could not load the database:', e.message); process.exit(1); }
+  http.createServer(async (req, res) => {
+    try {
+      const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+      if (p.startsWith('/api/')) return await api(req, res, p, req.method);
+      const fp = (!USE_SUPABASE && p.startsWith('/uploads/')) ? path.join(UP, path.basename(p)) : path.join(PUB, path.normalize(p === '/' ? '/index.html' : p));
+      if (!fp.startsWith(PUB) && !fp.startsWith(UP)) { res.writeHead(403); return res.end(); }
+      fs.readFile(fp, (e, d) => {
+        if (e) { res.writeHead(404); return res.end('Not found'); }
+        res.writeHead(200, { 'Content-Type': MIME[path.extname(fp)] || 'application/octet-stream' }); res.end(d);
+      });
+    } catch (e) { send(res, 500, { error: 'Server error' }); }
+  }).listen(PORT, () => console.log(`\n  Green Belt Nursery running at http://localhost:${PORT}\n  Admin login: ${ADMIN.email} / ${ADMIN.pass}\n  Storage: ${USE_SUPABASE ? 'Supabase (' + SB_URL + ')' : 'local file (' + DATA + ')'}\n`));
+})();
