@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Green Belt Nursery</title>
+<style>
+:root{--bg:#e4ecd6;--ink:#0f2a1d;--card:#f3f7ea;--fern:#3f7d4e;--gold:#f0a51c;--mut:#4d6455;--d:"Bahnschrift","Arial Narrow","Franklin Gothic Medium",Impact,sans-serif;--b:Georgia,"Times New Roman",serif}
+*{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:1.05rem/1.6 var(--b);overflow-x:hidden}
+a{color:inherit}img{max-width:100%;display:block}button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.mega,.big,h2,h3,nav a,.btn,.hi{font-family:var(--d)}
+.mega{font-size:clamp(4.6rem,22vw,21rem);font-weight:800;line-height:.78;letter-spacing:-.055em;white-space:nowrap}
+.big{font-size:clamp(3.4rem,13vw,11rem);font-weight:800;line-height:.85;letter-spacing:-.045em;margin-bottom:2rem}
+h2{font-size:clamp(2rem,5vw,4rem);line-height:1}h3{font-size:1.5rem;line-height:1.1}
+nav{position:fixed;inset:0 0 auto;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:.9rem 4vw;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px)}
+nav b{font:800 1.5rem var(--d);letter-spacing:-.03em;text-decoration:none}
+nav div{display:flex;gap:1.4rem;align-items:center}nav a{text-decoration:none;font-size:1.1rem;font-weight:600;position:relative}
+nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:3px;background:var(--gold)}
+#mb{display:none;background:var(--ink);color:var(--bg);border:0;border-radius:99px;padding:.4rem 1rem;cursor:pointer}
+@media(max-width:860px){#mb{display:block}nav div{position:fixed;inset:60px 0 auto;flex-direction:column;background:var(--bg);padding:1.5rem;gap:1rem;transform:translateY(-130%);transition:transform .5s cubic-bezier(.2,.8,.2,1)}nav.open div{transform:none}}
+#app{min-height:100vh;animation:in .7s cubic-bezier(.2,.8,.2,1)}@keyframes in{from{opacity:0;transform:translateY(24px)}}
+.pg{padding:8rem 4vw 5rem;max-width:1400px;margin:auto}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:7rem 0 3rem;position:relative;overflow:hidden;background:center/cover}
+.hero .mega{will-change:transform}.hero .mega:nth-child(2){color:var(--fern)}
+.hero p{max-width:34ch;font-size:1.3rem;margin:2rem 4vw 0}.hero .btns{margin:1.5rem 4vw 0;display:flex;gap:1rem;flex-wrap:wrap}
+.btn{display:inline-block;background:var(--ink);color:var(--bg);border:0;border-radius:99px;padding:.8rem 1.7rem;font-size:1.15rem;font-weight:700;cursor:pointer;text-decoration:none;transition:transform .3s,background .3s}
+.btn:hover{transform:translateY(-3px) rotate(-1.5deg);background:var(--fern)}.btn.g{background:var(--gold);color:var(--ink)}.btn.o{background:none;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.mq{background:var(--ink);color:var(--bg);overflow:hidden;white-space:nowrap;padding:1rem 0}
+.mq div{display:inline-block;animation:mq 40s linear infinite;font:700 2rem var(--d)}.mq span{margin:0 1.5rem}.mq i{color:var(--gold);font-style:normal}
+@keyframes mq{to{transform:translateX(-50%)}}
+.stage{height:min(78vh,640px);perspective:1500px;display:grid;place-items:center;cursor:grab;touch-action:pan-y;overflow:hidden;background:var(--fern);color:var(--bg);position:relative}
+.stage h2{position:absolute;top:2rem;left:4vw;z-index:2;pointer-events:none;max-width:12ch}.stage small{position:absolute;bottom:1.5rem;right:4vw;opacity:.8}
+.ring{position:relative;width:clamp(130px,16vw,220px);aspect-ratio:3/4;transform-style:preserve-3d;--r:clamp(210px,36vw,430px)}
+.ring>div{position:absolute;inset:0;transform:rotateY(calc(var(--i)*360deg/var(--n))) translateZ(var(--r));backface-visibility:hidden;border-radius:14px;overflow:hidden;background:var(--card);color:var(--ink);box-shadow:0 30px 50px #0005;cursor:pointer}
+.ring img{height:76%;width:100%;object-fit:cover;pointer-events:none}.ring p{padding:.5rem .7rem;font:700 1.05rem/1.1 var(--d)}.ring p i{display:block;font:italic .8rem var(--b);color:var(--mut)}
+.man{padding:14vh 4vw;max-width:1300px;margin:auto}.man p{font:800 clamp(2rem,6.4vw,5.6rem)/.98 var(--d);letter-spacing:-.03em;margin-bottom:1.6rem}
+.man span{opacity:.16;transition:opacity .5s}.man span.on{opacity:1}
+.sec{padding:5rem 4vw;max-width:1400px;margin:auto}.row2{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;margin-bottom:2rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.6rem}
+.card{cursor:pointer;background:var(--card);border-radius:22px 22px 60px 22px;overflow:hidden;padding-bottom:1.2rem;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.card:hover{transform:translateY(-8px)}.card .ph{aspect-ratio:1;overflow:hidden;margin-bottom:.9rem}.card img{width:100%;height:100%;object-fit:cover;transition:transform .8s}.card:hover img{transform:scale(1.09)}
+.card h3,.card i,.card .hi,.card .chips,.card p{margin:0 1.1rem}.card i{display:block;color:var(--mut);font-size:.95rem}.hi{display:block;font-size:1.35rem;color:var(--fern);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem!important}.chips span{background:var(--bg);border-radius:99px;padding:.15rem .7rem;font-size:.85rem}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.2,1)}.rv.in{opacity:1;transform:none}
+.bar{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:2rem}.bar input{flex:1 1 220px}
+input,textarea,select{width:100%;padding:.7rem 1rem;border:2px solid var(--ink);border-radius:12px;background:var(--card);margin-bottom:.8rem}
+.bar input{margin:0}.pill{border:2px solid var(--ink);background:none;border-radius:99px;padding:.4rem 1.1rem;cursor:pointer;font-family:var(--d);font-size:1.1rem}.pill.on{background:var(--ink);color:var(--bg)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:3rem}@media(max-width:800px){.two{grid-template-columns:1fr}}
+.lab{border-top:2px solid var(--ink);padding:1.5rem 0;display:grid;grid-template-columns:1fr 1.2fr;gap:2rem}@media(max-width:700px){.lab{grid-template-columns:1fr}}
+.lab h3{font-size:clamp(1.6rem,4vw,3rem)}
+details{border-top:2px solid var(--ink);padding:1.2rem 0}summary{cursor:pointer;font:700 clamp(1.5rem,3.5vw,2.6rem)/1.1 var(--d);list-style:none}summary small{display:block;font:.9rem var(--b);color:var(--mut)}
+details p{margin-top:1rem;max-width:60ch}
+.modal{position:fixed;inset:0;z-index:40;background:#0f2a1dcc;display:grid;place-items:center;padding:1rem;animation:fade .3s}@keyframes fade{from{opacity:0}}
+.mbox{background:var(--card);border-radius:24px;max-width:860px;width:100%;max-height:92vh;overflow:auto;display:grid;grid-template-columns:1fr 1fr;animation:pop .5s cubic-bezier(.2,.8,.2,1)}@keyframes pop{from{transform:scale(.85) rotate(-2deg)}}
+.mbox img{width:100%;height:100%;object-fit:cover;min-height:260px}.mbox>div{padding:2rem}@media(max-width:700px){.mbox{grid-template-columns:1fr}}
+dl{display:grid;grid-template-columns:auto 1fr;gap:.3rem 1rem;margin:1rem 0}dt{color:var(--mut)}dd{font-weight:700}
+.adm{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2rem}.tr{display:flex;gap:1rem;align-items:center;border-top:1px solid #0f2a1d33;padding:.6rem 0}.tr img{width:48px;height:48px;object-fit:cover;border-radius:8px}.tr>div{flex:1}
+.tr button{border:0;background:var(--bg);border-radius:8px;padding:.3rem .8rem;cursor:pointer}.tr button.x{background:#c0392b;color:#fff}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 1rem}.fg .w{grid-column:1/-1}label{font-size:.9rem;color:var(--mut)}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.7rem 1.4rem;border-radius:99px;z-index:60;animation:pop .4s}
+.blob{position:fixed;width:26px;height:26px;border-radius:50%;background:var(--gold);mix-blend-mode:multiply;pointer-events:none;z-index:50;left:-30px;top:-30px}@media(hover:none){.blob{display:none}}
+footer{background:var(--ink);color:var(--bg);padding:4rem 4vw;display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between}footer .big{color:var(--gold);margin:0;font-size:clamp(3rem,10vw,8rem)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style></head><body>
+<div class="blob" id="blob"></div>
+<nav id="nav"><b id="brand"></b><button id="mb" onclick="nav.classList.toggle('open')">Menu</button>
+<div id="links"></div></nav>
+<main id="app"></main><div id="foot"></div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let D={site:{},plants:[],posts:[],work:[],lab:[]},U=JSON.parse(localStorage.gb||'null'),FAV=[],CAT='All',Q='',AT='site',EDIT=null,nav=$('#nav');
+const api=(u,m='GET',b)=>fetch('/api/'+u,{method:m,headers:{'Content-Type':'application/json',...(U?{Authorization:'Bearer '+U.token}:{})},body:b&&JSON.stringify(b)}).then(r=>r.json());
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2600)};
+const img=p=>{if(p.img)return p.img;let h=0;for(const c of p.id+p.en)h=(h*31+c.charCodeAt(0))%80;h+=80;
+return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'><rect width='300' height='300' fill='hsl(${h},40%,80%)'/><g fill='hsl(${h},50%,32%)'><path d='M150 240C92 195 82 120 150 40c68 80 58 155 0 200z'/><path d='M150 240C112 222 62 195 42 140c58 0 98 30 108 100z' opacity='.75'/><path d='M150 240c38-18 88-45 108-100-58 0-98 30-108 100z' opacity='.75'/></g><path d='M150 240V70' stroke='hsl(${h},50%,80%)' stroke-width='3'/><path d='M100 240h100l-12 46h-76z' fill='#0f2a1d'/></svg>`)};
+const card=p=>`<article class="card rv" tabindex=0 onkeydown="event.key==='Enter'&&openP('${p.id}')" onclick="openP('${p.id}')"><div class=ph><img src="${E(img(p))}" alt="${E(p.en)}" loading=lazy></div><h3>${E(p.en)}</h3><i>${E(p.sci)}</i><b class=hi>${E(p.hi)}</b><div class=chips><span>Plant ${E(p.plantSize)}</span><span>Bag ${E(p.bagSize)}</span></div></article>`;
+async function load(){D=await api('data');if(U&&U.role==='user'){const m=await api('me');FAV=m.favs||[];if(m.error){U=null;localStorage.removeItem('gb')}}
+document.title=D.site.name;$('#brand').textContent=D.site.name;$('#brand').style.cursor='pointer';$('#brand').onclick=()=>location.hash='#/';
+const s=D.site;$('#foot').innerHTML=`<footer><div><div class=big>${E(s.name)}</div><p>${E(s.tagline)}</p></div><div><p>${E(s.address)}</p><p>${E(s.phone)}<br>${E(s.email)}</p><p>${E(s.hours)}</p></div></footer>`}
+const PAGES=[['','Home'],['plants','Plants'],['about','About'],['work','Work'],['lab','Lab'],['blog','Blog'],['contact','Contact']];
+function links(r){$('#links').innerHTML=PAGES.map(([k,n])=>`<a href="#/${k}" class="${r===k?'on':''}">${n}</a>`).join('')+(U?`<a href="#/${U.role==='admin'?'admin':'account'}" class="${r==='admin'||r==='account'?'on':''}">${U.role==='admin'?'Admin panel':'My panel'}</a>`:`<a href="#/login" class="${r==='login'?'on':''}">Log in</a>`)}
+/* pages */
+const home=()=>{const s=D.site,w=s.name.split(' '),names=D.plants.flatMap(p=>[`<span>${E(p.en)} <i>/</i> ${E(p.hi)}</span>`]).join('');
+const words=(s.manifesto||'').split('\n').map(l=>`<p>${l.split(' ').map(w=>`<span>${E(w)}</span>`).join(' ')}</p>`).join('');
+return `<section class=hero style="${s.heroImage?`background-image:linear-gradient(#e4ecd6cc,#e4ecd6f5),url(${E(s.heroImage)})`:''}"><div class=mega data-s=".12">${E(w.slice(0,2).join(' '))}</div><div class=mega data-s="-.1">${E(w.slice(2).join(' ')||'Plants')}</div><p>${E(s.tagline)}</p><div class=btns><a class=btn href="#/plants">See the plants</a><a class="btn g" href="#/contact">Visit us</a></div></section>
+<div class=mq><div>${names}${names}</div></div>
+<section class=stage id=stage><h2>Turn the ring. Pick a plant.</h2><div class=ring style="--n:${D.plants.length}">${D.plants.map((p,i)=>`<div style="--i:${i}" onclick="openP('${p.id}')"><img src="${E(img(p))}" alt="${E(p.en)}"><p>${E(p.en)}<i>${E(p.sci)}</i></p></div>`).join('')}</div><small>Drag or swipe to spin</small></section>
+<section class=man id=man>${words}</section>
+<section class=sec><div class=row2><h2>From the nursery beds</h2><a class=btn href="#/plants">All ${D.plants.length} plants</a></div><div class=grid>${D.plants.slice(0,6).map(card).join('')}</div></section>`};
+const plants=()=>`<section class=pg><h1 class=big>The plants</h1><div class=bar><input id=q placeholder="Search by English, scientific or Hindi name" value="${E(Q)}" oninput="Q=this.value;grid()">${['All',...new Set(D.plants.map(p=>p.cat))].map(c=>`<button class="pill ${c===CAT?'on':''}" onclick="CAT='${E(c)}';route()">${E(c)}</button>`).join('')}</div><div class=grid id=g></div></section>`;
+function grid(){const q=Q.toLowerCase(),l=D.plants.filter(p=>(CAT==='All'||p.cat===CAT)&&[p.en,p.sci,p.hi].join(' ').toLowerCase().includes(q));$('#g').innerHTML=l.map(card).join('')||'<p>No plant matches. Try another name or category.</p>';reveal()}
+const about=()=>{const s=D.site;return `<section class=pg><h1 class=big>About us</h1><div class=two><p style="font-size:1.4rem">${E(s.about)}</p><div class=card style="padding:0 0 1.5rem"><div class=ph><img src="${E(s.aboutImage||img({id:'a',en:'nursery'}))}" alt=""></div><h3>Find us</h3><p>${E(s.address)}</p><p>${E(s.hours)}</p></div></div></section>`};
+const work=()=>`<section class=pg><h1 class=big>Our work</h1><div class=grid>${D.work.map(w=>`<article class="card rv"><div class=ph><img src="${E(w.img||img({id:w.id,en:w.title}))}" alt=""></div><h3>${E(w.title)}</h3><p>${E(w.desc)}</p></article>`).join('')}</div></section>`;
+const lab=()=>`<section class=pg><h1 class=big>The lab</h1>${D.lab.map(l=>`<div class="lab rv"><h3>${E(l.title)}</h3><p>${E(l.desc)}</p></div>`).join('')}</section>`;
+const blog=()=>`<section class=pg><h1 class=big>Blog</h1>${D.posts.map(p=>`<details class=rv><summary>${E(p.title)}<small>${E(p.date)}</small></summary>${p.img?`<img src="${E(p.img)}" style="max-width:420px;margin-top:1rem;border-radius:16px">`:''}<p>${E(p.body)}</p></details>`).join('')}</section>`;
+const contact=()=>{const s=D.site;return `<section class=pg><h1 class=big>Say hello</h1><div class=two><div><h2>${E(s.phone)}</h2><p>${E(s.email)}</p><p>${E(s.address)}</p><p>${E(s.hours)}</p></div><div><input id=cn placeholder="Your name"><input id=ce placeholder="Email or phone"><textarea id=cm rows=5 placeholder="Which plants, how many, when?"></textarea><button class=btn onclick=send()>Send message</button></div></div></section>`};
+async function send(){const r=await api('contact','POST',{name:$('#cn').value,email:$('#ce').value,msg:$('#cm').value});r.error?toast(r.error):(toast('Message sent'),['#cn','#ce','#cm'].forEach(i=>$(i).value=''))}
+const login=(reg)=>`<section class=pg><h1 class=big>${reg?'Join us':'Log in'}</h1><div style="max-width:460px">${reg?'<input id=ln placeholder="Your name">':''}<input id=le type=email placeholder="Email"><input id=lp type=password placeholder="Password"><button class=btn onclick="auth(${!!reg})">${reg?'Create account':'Log in'}</button> <button class="btn o" onclick="LR=${!reg};route()">${reg?'I have an account':'Create an account'}</button></div></section>`;
+let LR=false;
+async function auth(reg){const r=await api(reg?'register':'login','POST',{name:$('#ln')?.value,email:$('#le').value,pass:$('#lp').value});if(r.error)return toast(r.error);U=r;localStorage.gb=JSON.stringify(r);await load();location.hash=r.role==='admin'?'#/admin':'#/account'}
+function logout(){U=null;FAV=[];localStorage.removeItem('gb');location.hash='#/';route()}
+const account=()=>{if(!U||U.role!=='user')return login();return `<section class=pg><h1 class=big>Hello, ${E(U.name)}</h1><div class=row2><h2>Saved plants</h2><button class="btn o" onclick=logout()>Log out</button></div><div class=grid>${D.plants.filter(p=>FAV.includes(p.id)).map(card).join('')||'<p>Nothing saved yet. Open any plant and choose Save.</p>'}</div></section>`};
+async function fav(id){if(!U||U.role!=='user'){closeM();location.hash='#/login';return toast('Log in to save plants')}const r=await api('me','POST',{id});FAV=r.favs;openP(id);toast(FAV.includes(id)?'Saved':'Removed')}
+function openP(id){const p=D.plants.find(x=>x.id===id);if(!p)return;closeM();const m=document.createElement('div');m.className='modal';m.onclick=e=>e.target===m&&closeM();
+m.innerHTML=`<div class=mbox><img src="${E(img(p))}" alt="${E(p.en)}"><div><h2>${E(p.en)}</h2><i>${E(p.sci)}</i><b class=hi>${E(p.hi)}</b><p>${E(p.desc)}</p><dl><dt>Plant size</dt><dd>${E(p.plantSize)}</dd><dt>Bag size</dt><dd>${E(p.bagSize)}</dd><dt>Category</dt><dd>${E(p.cat)}</dd></dl><button class=btn onclick="fav('${p.id}')">${FAV.includes(p.id)?'Remove from saved':'Save this plant'}</button> <button class="btn o" onclick=closeM()>Close</button></div></div>`;document.body.append(m)}
+const closeM=()=>$$('.modal').forEach(m=>m.remove());addEventListener('keydown',e=>e.key==='Escape'&&closeM());
+/* admin */
+const F={site:[['name','Nursery name'],['tagline','Tagline'],['phone','Phone'],['email','Email'],['address','Address','t'],['hours','Opening hours'],['about','About text','t'],['manifesto','Manifesto (one line per row)','t'],['aboutImage','About image','i'],['heroImage','Hero background image','i']],
+plants:[['en','English name'],['sci','Scientific name'],['hi','Hindi name'],['plantSize','Plant size'],['bagSize','Bag size'],['cat','Category'],['desc','Description','t'],['img','Image (blank = drawn leaf)','i']],
+posts:[['title','Title'],['date','Date'],['body','Text','t'],['img','Image','i']],work:[['title','Title'],['desc','Description','t'],['img','Image','i']],lab:[['title','Title'],['desc','Description','t']]};
+const form=(f,o,fn)=>`<div class=fg>${f.map(([k,l,t])=>`<div class="${t?'w':''}"><label>${l}</label>${t==='t'?`<textarea id=f_${k} rows=3>${E(o[k])}</textarea>`:`<input id=f_${k} value="${E(o[k])}">${t==='i'?`<input type=file accept="image/*" onchange="up(this,'${k}')">`:''}`}</div>`).join('')}</div><button class=btn onclick="${fn}">Save changes</button>`;
+function up(inp,k){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{const x=await api('admin/upload','POST',{data:r.result});x.error?toast(x.error):($('#f_'+k).value=x.url,toast('Image uploaded. Now save changes.'))};r.readAsDataURL(f)}
+const vals=f=>Object.fromEntries(f.map(([k])=>[k,$('#f_'+k).value]));
+async function admin(){if(!U||U.role!=='admin')return login();
+let b='';const t=['site','plants','posts','work','lab','messages'];
+if(AT==='site')b=form(F.site,D.site,'saveSite()');
+else if(AT==='messages'){const m=await api('admin/messages');b=(m.map(x=>`<div class=tr><div><b>${E(x.name)}</b> (${E(x.email)})<br>${E(x.msg)}</div><button class=x onclick="del('messages','${x.id}')">Delete</button></div>`).join(''))||'<p>No messages yet.</p>'}
+else{const e=EDIT&&D[AT].find(x=>x.id===EDIT)||{};b=`<h2>${EDIT?'Edit item':'Add new'}</h2>${form(F[AT],e,'saveItem()')}${EDIT?'<button class="btn o" onclick="EDIT=null;route()">Cancel edit</button>':''}<h2 style="margin-top:2.5rem">All items (${D[AT].length})</h2>${D[AT].map(x=>`<div class=tr>${AT!=='lab'?`<img src="${E(img({...x,en:x.en||x.title}))}" alt="">`:''}<div><b>${E(x.en||x.title)}</b><br><small>${E(x.sci||x.hi||x.desc||x.date||'')}</small></div><button onclick="EDIT='${x.id}';route()">Edit</button><button class=x onclick="del('${AT}','${x.id}')">Remove</button></div>`).join('')}`}
+return `<section class=pg><div class=row2><h1 class=big style="margin:0">Admin</h1><button class="btn o" onclick=logout()>Log out</button></div><div class=adm>${t.map(x=>`<button class="pill ${x===AT?'on':''}" onclick="AT='${x}';EDIT=null;route()">${x==='site'?'Website details':x[0].toUpperCase()+x.slice(1)}</button>`).join('')}</div>${b}</section>`}
+async function saveSite(){const r=await api('admin/site','PUT',vals(F.site));r.error?toast(r.error):(await load(),toast('Website updated'),route())}
+async function saveItem(){const o=vals(F[AT]),r=EDIT?await api(`admin/${AT}/${EDIT}`,'PUT',o):await api(`admin/${AT}`,'POST',o);if(r.error)return toast(r.error);EDIT=null;await load();toast('Saved');route()}
+async function del(c,id){if(!confirm('Remove this permanently?'))return;await api(`admin/${c}/${id}`,'DELETE');await load();toast('Removed');route()}
+/* engine */
+const R={'':home,plants,about,work,lab,blog,contact,login:()=>login(LR),account,admin};
+async function route(){const r=location.hash.slice(2).split('/')[0];nav.classList.remove('open');links(r);const y=scrollY;$('#app').innerHTML=await (R[r]||home)();if(!$('#app').dataset.k||$('#app').dataset.k!==r){scrollTo(0,0);$('#app').dataset.k=r}else scrollTo(0,y);
+if(r==='plants')grid();reveal();spin();tick()}
+function reveal(){const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&(e.target.classList.add('in'),io.unobserve(e.target))),{threshold:.12});$$('.rv:not(.in)').forEach(x=>io.observe(x))}
+function spin(){const el=$('.ring'),st=$('#stage');if(!el)return;let a=0,v=.25,d=0,lx=0,tx=0;
+st.onpointerdown=e=>{d=1;lx=e.clientX;st.style.cursor='grabbing'};addEventListener('pointerup',()=>{d=0;st.style.cursor=''});
+st.onpointermove=e=>{if(d){v=(e.clientX-lx)*.35;lx=e.clientX}tx=((e.clientY/innerHeight)-.5)*-14};
+(function f(){if(!document.body.contains(el))return;a+=v;v+=(.25-v)*.03;el.style.transform=`rotateX(${tx}deg) rotateY(${a}deg)`;requestAnimationFrame(f)})()}
+function tick(){$$('[data-s]').forEach(e=>e.style.transform=`translateX(${scrollY*e.dataset.s}px)`);
+const m=$('#man');if(m){const r=m.getBoundingClientRect(),p=Math.min(1,Math.max(0,(innerHeight*.85-r.top)/(r.height+innerHeight*.1))),w=$$('span',m);w.forEach((s,i)=>s.classList.toggle('on',i<p*w.length*1.05))}}
+addEventListener('scroll',tick,{passive:true});addEventListener('hashchange',()=>{AT=AT;route()});
+const bl=$('#blob');let bx=0,by=0,mx=0,my=0;addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY});(function f(){bx+=(mx-bx)*.15;by+=(my-by)*.15;bl.style.transform=`translate(${bx-13}px,${by-13}px)`;requestAnimationFrame(f)})();
+load().then(route);
+</script></body></html>
